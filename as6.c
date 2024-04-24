@@ -7,6 +7,7 @@
 /// Description: This program is an implementation of a word detection program using pthread functions in C.
 ///     It compares the speed of blocking (join) and non-blocking (detached) threads.
 
+#include "as6.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,11 +16,6 @@
 #include <unistd.h>
 
 const int max_string_length = 100;
-
-void* word_detect_join(void *vargp);
-void* word_detect_detach(void *vargp);
-void printFrequency(char *word, int frequency);
-void printElapsedTime(char *threadName, clock_t start, clock_t end);
 
 int main() {
     // pthread_t tid = pthread_self();
