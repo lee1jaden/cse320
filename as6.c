@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 const int max_string_length = 100;
 
@@ -20,14 +21,9 @@ void* word_detect_detach(void *vargp);
 void printFrequency(char *word, int frequency);
 void printElapsedTime(char *threadName, clock_t start, clock_t end);
 
-clock_t join_start_time;
-clock_t join_end_time;
-clock_t detach_start_time;
-clock_t detach_end_time;
-
 int main() {
-    pthread_t tid = pthread_self();
-    printf("Main Thread ID: %u\n", (unsigned int)tid);
+    // pthread_t tid = pthread_self();
+    // printf("Main Thread ID: %u\n", (unsigned int)tid);
     char text_string[max_string_length + 2];
     char target_word[max_string_length + 2];
 
@@ -60,13 +56,13 @@ int main() {
         }
 
         // Set up array of arguments to pass to thread functions.
-        char *args[2] = {text_string, target_word};
+        char *join_args[2] = {strdup(text_string), strdup(target_word)};
+        char *detach_args[2] = {strdup(text_string), strdup(target_word)};
 
         // Create a peer thread for word_detect_join, detecting a word in the str buffer using pthread_join
         pthread_t join_tid;
         void* frequencyPtr;
-        join_start_time = clock();
-        if (pthread_create(&join_tid, NULL, &word_detect_join, args) != 0) {
+        if (pthread_create(&join_tid, NULL, &word_detect_join, join_args) != 0) {
             printf("Error: Join thread creation failed. Now exiting.\n");
             exit(EXIT_FAILURE);
         }
@@ -74,31 +70,39 @@ int main() {
             printf("Error: Join thread reaping failed. Now exiting.\n");
             exit(EXIT_FAILURE);
         }
-        join_end_time = clock();
-        printFrequency(target_word, *(int*)frequencyPtr);
-        printElapsedTime("joined thread", join_start_time, join_end_time);
+
+        // Free the buffer if you dynamically allocate memory. This pointer could've been used to print the frequency
         free(frequencyPtr);
 
+        // Create a peer thread for word_detect_detach, detecting a word in the str buffer using pthread_detach
+        pthread_t detach_tid;
+        if (pthread_create(&detach_tid, NULL, &word_detect_detach, detach_args) != 0) {
+            printf("Error: Detach thread creation failed. Now exiting.\n");
+            exit(EXIT_FAILURE);
+        }
+        if (pthread_detach(detach_tid) != 0) {
+            printf("Error: Detaching thread reaping failed. Now exiting.\n");
+            exit(EXIT_FAILURE);
+        }
 
-        // TODO: Create a peer thread for word_detect_detach, detecting a word in the str buffer using pthread_detach
-        // ...
+        sleep(2); // Preserves order of output when the loop iterates as the detached thread finishes.
     }
-    // TODO: Free the str buffer if you dynamically allocate the string memory
 
     return 0;
 }
 
-/// @brief 
-/// @param vargp - text string to search through.
-/// @return NULL
 void* word_detect_join(void *vargp) {
+    clock_t join_start_time = clock();
+
+    // Implement a peer thread using pthread_join to detect a word in the argument passed
     char **args = (char**)vargp;
     char *sentence = args[0];
     char *search_word = args[1];
-    // printf("Trying to detect '%s' from '%s'?\n", word, sentence); //DEBUG
-
     int *frequencyPtr = malloc(sizeof(int));
     *frequencyPtr = 0;
+
+    // printf("Trying to detect '%s' from '%s'?\n", search_word, sentence); //DEBUG
+
     char *token = strtok(sentence, " ");
     while (token != NULL) {
         if (strcmp(token, search_word) == 0)
@@ -106,21 +110,48 @@ void* word_detect_join(void *vargp) {
         token = strtok(NULL, " ");
     }
 
+    // Print the detected word and frequency if there are multiple detections
+    printFrequency(search_word, *(int*)frequencyPtr);
+    // Free the buffer if you dynamically allocate memory for strings
+    free(sentence);
+    free(search_word);
+
+    // Calculate the elapsed execution time in the thread execution using join_start_time and join_end_time 
+    clock_t join_end_time = clock();
+    printElapsedTime("joined thread", join_start_time, join_end_time);
 
     pthread_exit(frequencyPtr);
-
-    // TODO: Implement a peer thread using pthread_join to detect a word in the argument passed
-    // TODO: Print the detected word and frequency if there are multiple detections
-    // TODO: Calculate the elapsed execution time in the thread execution using join_start_time and join_end_time 
-    // i.e., join_start_time = clock(); <... your thread function>; join_end_time = clock(); 
-    //float join_execution_time = join_end_time - join_start_time;
     return NULL;
 }
 
 void* word_detect_detach(void *vargp) {
-    // TODO: Implement a peer thread using pthread_detach to detect a word in the argument passed
-    // TODO: Print the detected word and frequency if there are multiple detections
-    // TODO: Calculate the elapsed execution time in the thread execution using detach_start_time and detach_end_time 
+    clock_t detach_start_time = clock();
+
+    // Implement a peer thread using pthread_detach to detect a word in the argument passed
+    char **args = (char**)vargp;
+    char *sentence = args[0];
+    char *search_word = args[1];
+    int wordFrenquency = 0;
+
+    // printf("Trying to detect '%s' from '%s'?\n", search_word, sentence); //DEBUG
+
+    char *token = strtok(sentence, " ");
+    while (token != NULL) {
+        if (strcmp(token, search_word) == 0)
+            wordFrenquency++;
+        token = strtok(NULL, " ");
+    }
+
+    // Print the detected word and frequency if there are multiple detections
+    printFrequency(search_word, wordFrenquency);
+    // Free the buffer if you dynamically allocate memory for strings
+    free(sentence);
+    free(search_word);
+
+    // Calculate the elapsed execution time in the thread execution using detach_start_time and detach_end_time 
+    clock_t detach_end_time = clock();
+    printElapsedTime("detached thread", detach_start_time, detach_end_time);
+
     return NULL;
 }
 
@@ -129,6 +160,6 @@ void printFrequency(char *word, int frequency) {
 }
 
 void printElapsedTime(char *threadName, clock_t start, clock_t end) {
-    double secondsElapsed = (double)(join_end_time - join_start_time) / CLOCKS_PER_SEC;
-    printf("The %s took %.6f seconds to complete.\n", threadName, secondsElapsed);
+    double secondsElapsed = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("The %s took %.7f seconds to complete.\n", threadName, secondsElapsed);
 }
