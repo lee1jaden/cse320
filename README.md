@@ -14,12 +14,19 @@ Copyright:      Jaden Lee and SUNY Korea - This work may not be copied for use i
 This program satisfies the requirements laid forth in the Assignment 6 instructions document linked here: 
     https://drive.google.com/file/d/1YujyQYkKsr6pbByw9DyPuMfR5Ad7iuLo/view
 
-//todo
-Implementing a word detection program using pthread functions.
+The program is an implementation of a word detection program using pthread functions. It prompts users to enter a
+text string up to 100 characters and a word to search for in that string. The program will determine how often the 
+string occurs first with a join thread and then with a detached thread. Each thread will output its execution time. 
+This process will be iterated until the user quits the program by entering 'quit'.
 
 # Compilation and Execution Instructions
 
-//todo
+A Makefile is included in the repository. Run the following command to compile:
+    make as6
+Then execute the binary file with:
+    ./as6
+If you desire to recompile the entire repository, first run this before compiling again:
+    make clean
 
 # Assumptions
 
