@@ -67,7 +67,7 @@ int main() {
             exit(EXIT_FAILURE);
         }
 
-        // Free the buffer if you dynamically allocate memory. This pointer could've been used to print the frequency
+        // Free the buffer if you dynamically allocate memory. This pointer could've been used to print the frequency.
         free(frequencyPtr);
 
         // Create a peer thread for word_detect_detach, detecting a word in the str buffer using pthread_detach
@@ -88,9 +88,10 @@ int main() {
 }
 
 void* word_detect_join(void *vargp) {
+    // Implement a peer thread using pthread_join to detect a word in the argument passed.
     clock_t join_start_time = clock();
 
-    // Implement a peer thread using pthread_join to detect a word in the argument passed
+    // Cast arguments and allocate variables.
     char **args = (char**)vargp;
     char *sentence = args[0];
     char *search_word = args[1];
@@ -99,6 +100,7 @@ void* word_detect_join(void *vargp) {
 
     // printf("Trying to detect '%s' from '%s'?\n", search_word, sentence); //DEBUG
 
+    // Iterate through the words of the text to determine the frequency of the target word
     char *token = strtok(sentence, " ");
     while (token != NULL) {
         if (strcmp(token, search_word) == 0)
@@ -106,9 +108,9 @@ void* word_detect_join(void *vargp) {
         token = strtok(NULL, " ");
     }
 
-    // Print the detected word and frequency if there are multiple detections
+    // Print the detected word and frequency if there are multiple detections.
     printFrequency(search_word, *(int*)frequencyPtr);
-    // Free the buffer if you dynamically allocate memory for strings
+    // Free the buffer if you dynamically allocate memory for strings.
     free(sentence);
     free(search_word);
 
@@ -121,9 +123,10 @@ void* word_detect_join(void *vargp) {
 }
 
 void* word_detect_detach(void *vargp) {
+    // Implement a peer thread using pthread_detach to detect a word in the argument passed
     clock_t detach_start_time = clock();
 
-    // Implement a peer thread using pthread_detach to detect a word in the argument passed
+    // Cast arguments and allocate variables.
     char **args = (char**)vargp;
     char *sentence = args[0];
     char *search_word = args[1];
@@ -131,6 +134,7 @@ void* word_detect_detach(void *vargp) {
 
     // printf("Trying to detect '%s' from '%s'?\n", search_word, sentence); //DEBUG
 
+    // Iterate through the words of the text to determine the frequency of the target word
     char *token = strtok(sentence, " ");
     while (token != NULL) {
         if (strcmp(token, search_word) == 0)

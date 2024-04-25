@@ -33,3 +33,4 @@ This process will be iterated until the user quits the program by entering 'quit
 - The execution time for the joined thread should not include the time spent returning control to the main function. The extra lines of code required would alter the results and make the joined and detached threads incomparable. Calculating the execution time of the detached thread would be impossible from the main method because it is non-blocking.
 - The order of successive iterations should always be preserved. This is why there is a 2 second sleep period after beginning the detached thread. The thread should be able to finish in this time, but the non-blocking characteristic of it should be acknowledged.
 - Formerly global variables could be moved to a smaller scope and passed as parameters. 
+- Determinations of whether a word occurs is case-sensitive.
