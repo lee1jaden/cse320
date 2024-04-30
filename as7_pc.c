@@ -13,18 +13,18 @@
 
 const int producer_num_iterations = 2;
 const int num_items_produced = 100;
-const int consumer_num_iterations = 3;
+const int consumer_num_iterations = 20;
 const int num_items_consumed = 10;
-const int buffer_size = 15000;
+const int buffer_size = 120;
 
 /// @brief The sbuf_t data structure encapsulates a buffer of integers. Items can be inserted at the head and
 ///     removed from the tail. Semaphores protect the shared data and prevent data corruption.
 typedef struct {
     int *buf;
     int capacity, head, tail;
-    sem_t mutex; // protects buffer while inserting and removing
-    sem_t slots; // prevents adding to full buffer when slots = 0
-    sem_t items; // 
+    sem_t mutex; // binary semaphore - protects buffer while inserting and removing
+    sem_t slots; // counting semaphore - prevents adding to full buffer when slots = 0
+    sem_t items; // counting semaphore - prevents consuming from empty buffer when items = 0
 } sbuf_t;
 
 /// @brief Initializes a sbuf_t object with semaphores, default values, and allocated buffer memory.
@@ -54,7 +54,7 @@ void sbuf_deinit(sbuf_t *sp) {
 int sbuf_size(sbuf_t *sp) {
     sem_wait(&sp->mutex); // access buffer after acquiring the lock
     int n = (sp->head + sp->capacity - sp->tail) % sp->capacity;
-    sem_post(&sp->mutex);
+    sem_post(&sp->mutex); // release the lock
     return n;
 }
 
@@ -66,7 +66,7 @@ void sbuf_insert(sbuf_t *sp, int item) {
     sem_wait(&sp->mutex); // access buffer after acquiring the lock
     sp->head = (sp->head + 1) % sp->capacity;
     sp->buf[sp->head] = item;
-    sem_post(&sp->mutex);
+    sem_post(&sp->mutex); // release the lock
     sem_post(&sp->items); // wake up consumer if it is suspended
 }
 
@@ -78,7 +78,7 @@ int sbuf_remove(sbuf_t *sp) {
     sem_wait(&sp->mutex); // access buffer after acquiring the lock
     sp->tail= (sp->tail + 1) % sp->capacity;
     int item = sp->buf[sp->tail];
-    sem_post(&sp->mutex);
+    sem_post(&sp->mutex); // release the lock
     sem_post(&sp->slots); // wake up producer if it is suspended
     return item;
 }
@@ -93,7 +93,7 @@ void* producer(void* vargp) {
         long s = 0;
         for(j = 0; j < num_items_produced; j++)  //-----------------------------------------------------------
             s += j, sbuf_insert(sp, j);
-	    printf("producer: sum: %ld, size: %d\n", s, sbuf_size(sp));  //-----------------------------------------------------------
+	    printf("Producer #%d: Sum of inserted numbers = %ld | Current Buffer Size = %d\n", i+1, s, sbuf_size(sp));  //-----------------------------------------------------------
     }
     pthread_exit(NULL);
 }
@@ -108,7 +108,7 @@ void* consumer(void* vargp) {
         long s = 0;
         for(j = 0; j < num_items_consumed; j++)  //-----------------------------------------------------------
             s += sbuf_remove(sp);
-        printf("consumer: sum: %ld, size: %d\n", s, sbuf_size(sp));  //-----------------------------------------------------------
+        printf("Consumer #%d: Sum of removed numbers = %ld | Current Buffer Size = %d\n", i+1, s, sbuf_size(sp));  //-----------------------------------------------------------
     }
     pthread_exit(NULL);
 }
@@ -120,6 +120,8 @@ int main() {
     sbuf_t sb;
     sbuf_init(&sb, buffer_size);
 
+    printf("Each producer will insert %d numbers.\n", num_items_produced);
+    printf("Each consumer will remove %d numbers.\n", num_items_consumed);
     pthread_create(&tid_p, NULL, producer, &sb);
     pthread_create(&tid_c, NULL, consumer, &sb);
 

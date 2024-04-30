@@ -36,6 +36,7 @@ To recompile the entire repository, first run the following command before compi
 
 # Producer-Consumer Example Semaphore Analysis
 
+Upon inspecting results of the printed code, it appears the semaphores work properly. Orderings of the producer and consumer result print statements vary on each execution, but that is due to unpredictable thread ordering in each execution by the operating system. Similarly, the outputed buffer sizes can vary because the point at which the consumers acquire the lock from a producer varies on each execution. As long as the sums are correct, then the semaphores should be working properly. That indicates that the shared data remains uncorrupted, no data is overwritten or skipped, and the code is free of synchronization errors.
 
 # Assumptions
 - 
