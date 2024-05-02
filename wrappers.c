@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 void SEM_init(sem_t *semaphore, int pshared, int value) {
     if (sem_init(semaphore, pshared, value) != 0) {

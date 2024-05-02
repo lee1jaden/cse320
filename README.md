@@ -44,3 +44,4 @@ To recompile the entire repository, first run the following command before compi
 
 # Assumptions
 - No two writers can modify the variable at the same time. They may not make their edits in the order they come in, but the shared data should be protected.
+- Writers that arrive will not have priority over readers that are already waiting.

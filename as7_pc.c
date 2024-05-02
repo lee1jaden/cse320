@@ -58,11 +58,11 @@ int sbuf_remove(sbuf_t *sp) {
 void* producer(void* vargp) {
     sbuf_t *sp = (sbuf_t*)vargp;
     int i, j;
-    for(i = 0; i < producer_num_iterations; i++) { //-----------------------------------------------------------
+    for(i = 0; i < producer_num_iterations; i++) { 
         long s = 0;
-        for(j = 0; j < num_items_produced; j++)  //-----------------------------------------------------------
+        for(j = 0; j < num_items_produced; j++) 
             s += j, sbuf_insert(sp, j);
-	    printf("Producer #%d: Sum of inserted numbers = %ld | Current Buffer Size = %d\n", i+1, s, sbuf_size(sp));  //-----------------------------------------------------------
+	    printf("Producer #%d: Sum of inserted numbers = %ld | Current Buffer Size = %d\n", i+1, s, sbuf_size(sp)); 
     }
     pthread_exit(NULL);
 }
@@ -70,11 +70,11 @@ void* producer(void* vargp) {
 void* consumer(void* vargp) {
     sbuf_t *sp = (sbuf_t*)vargp;
     int i, j;
-    for(i = 0; i < consumer_num_iterations; i++) {  //-----------------------------------------------------------
+    for(i = 0; i < consumer_num_iterations; i++) {  
         long s = 0;
-        for(j = 0; j < num_items_consumed; j++)  //-----------------------------------------------------------
+        for(j = 0; j < num_items_consumed; j++)  
             s += sbuf_remove(sp);
-        printf("Consumer #%d: Sum of removed numbers = %ld | Current Buffer Size = %d\n", i+1, s, sbuf_size(sp));  //-----------------------------------------------------------
+        printf("Consumer #%d: Sum of removed numbers = %ld | Current Buffer Size = %d\n", i+1, s, sbuf_size(sp)); 
     }
     pthread_exit(NULL);
 }
