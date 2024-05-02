@@ -27,6 +27,44 @@ typedef struct {
     sem_t items; // counting semaphore - prevents consuming from empty buffer when items = 0
 } sbuf_t;
 
+/// @brief Wrapper method for sem_init that handles error results.
+/// @param semaphore semaphore to be initialized
+/// @param pshared = 0
+/// @param value initial value
+void SEM_init(sem_t *semaphore, int pshared, int value) {
+    if (sem_init(semaphore, pshared, value) != 0) {
+        printf("Error occurred while initializing semaphore.");
+        exit(0);
+    }
+}
+
+/// @brief Wrapper method for sem_destroy that handles error results
+/// @param semaphore semaphore to be destroyed
+void SEM_destroy(sem_t *semaphore) {
+    if (sem_destroy(semaphore) != 0) {
+        printf("Error occurred while destroying semaphore.");
+        exit(0);
+    }
+}
+
+/// @brief Wrapper method for sem_wait that handles error results
+/// @param semaphore semaphore to be decremented
+void SEM_wait(sem_t *semaphore) {
+    if (sem_wait(semaphore) != 0) {
+        printf("Error occurred while decrementing semaphore.");
+        exit(0);
+    }
+}
+
+/// @brief Wrapper method for sem_post that handles error results
+/// @param semaphore semaphore to be incremented
+void SEM_post(sem_t *semaphore) {
+    if (sem_post(semaphore) != 0) {
+        printf("Error occurred while incrementing semaphore.");
+        exit(0);
+    }
+}
+
 /// @brief Initializes a sbuf_t object with semaphores, default values, and allocated buffer memory.
 /// @param sp uninitialized sbuf_t object
 /// @param n number of slots to allocate in the buffer
@@ -34,27 +72,27 @@ void sbuf_init(sbuf_t* sp, int n) {
     sp->buf = (int*) calloc(n, sizeof(int));
     sp->capacity = n;
     sp->head = sp->tail = 0;
-    sem_init(&sp->mutex, 0, 1);
-    sem_init(&sp->slots, 0, n);
-    sem_init(&sp->items, 0, 0);
+    SEM_init(&sp->mutex, 0, 1);
+    SEM_init(&sp->slots, 0, n);
+    SEM_init(&sp->items, 0, 0);
 }
 
 /// @brief Deinitializes a sbuf_t object by deallocating buffer memory and destroying semaphores.
 /// @param sp sbuf_t object to be destroyed
 void sbuf_deinit(sbuf_t *sp) {
     free(sp->buf);
-    sem_destroy(&sp->mutex);
-    sem_destroy(&sp->slots); 
-    sem_destroy(&sp->items); 
+    SEM_destroy(&sp->mutex);
+    SEM_destroy(&sp->slots); 
+    SEM_destroy(&sp->items); 
 }
 
 /// @brief Evaluates the number of slots currently filled. 
 /// @param sp sbuf_t object
 /// @return number of filled slots in buffer
 int sbuf_size(sbuf_t *sp) {
-    sem_wait(&sp->mutex); // access buffer after acquiring the lock
+    SEM_wait(&sp->mutex); // access buffer after acquiring the lock
     int n = (sp->head + sp->capacity - sp->tail) % sp->capacity;
-    sem_post(&sp->mutex); // release the lock
+    SEM_post(&sp->mutex); // release the lock
     return n;
 }
 
@@ -62,24 +100,24 @@ int sbuf_size(sbuf_t *sp) {
 /// @param sp sbuf_t object to insert into
 /// @param item integer to insert
 void sbuf_insert(sbuf_t *sp, int item) {
-    sem_wait(&sp->slots); // wait while the buffer is full
-    sem_wait(&sp->mutex); // access buffer after acquiring the lock
+    SEM_wait(&sp->slots); // wait while the buffer is full
+    SEM_wait(&sp->mutex); // access buffer after acquiring the lock
     sp->head = (sp->head + 1) % sp->capacity;
     sp->buf[sp->head] = item;
-    sem_post(&sp->mutex); // release the lock
-    sem_post(&sp->items); // wake up consumer if it is suspended
+    SEM_post(&sp->mutex); // release the lock
+    SEM_post(&sp->items); // wake up consumer if it is suspended
 }
 
 /// @brief Removes an integer from the buffer array and increments the tail index where consumed items are read.
 /// @param sp sbuf_t object to remove from
 /// @return integer being consumed
 int sbuf_remove(sbuf_t *sp) {
-    sem_wait(&sp->items); // wait while the buffer is empty
-    sem_wait(&sp->mutex); // access buffer after acquiring the lock
+    SEM_wait(&sp->items); // wait while the buffer is empty
+    SEM_wait(&sp->mutex); // access buffer after acquiring the lock
     sp->tail= (sp->tail + 1) % sp->capacity;
     int item = sp->buf[sp->tail];
-    sem_post(&sp->mutex); // release the lock
-    sem_post(&sp->slots); // wake up producer if it is suspended
+    SEM_post(&sp->mutex); // release the lock
+    SEM_post(&sp->slots); // wake up producer if it is suspended
     return item;
 }
 
