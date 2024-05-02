@@ -14,9 +14,17 @@
 This program satisfies the requirements laid forth in the Assignment 7 instructions document linked here: 
     https://drive.google.com/file/d/1jpiVjaX6MhK2VD9ZSvKuPv3cWqp4f8Do/view
 
-This program was completed to practice implementing semaphores in a multithreaded program. The first program
-is a producer-consumer example. Within that, the printing code was corrected to monitor the behavior of producers 
-and consumers in the program. There is a discussion below of whether the semaphores work correctly or not.
+This program was completed to practice implementing semaphores in a multithreaded program. Part 1 investigated the 
+producer-consumer example and Part 2 investigated the second version of the reader-writer problem.
+
+Part 1:
+The first program is a producer-consumer example. Within that, the printing code was corrected to monitor the behavior 
+of producers and consumers in the program. There is a discussion below of whether the semaphores work correctly or not.
+
+Part 2:
+The second problem is a readers-writers example. There is a collection of concurrent threads that access shared data. 
+The reader threads only read the data and write threads only modify the data. Once a writer is ready to write, it performs 
+its operation as soon as possible and a reader that arrives after a write must wait, even if the writer is already waiting.
 
 # Compilation and Execution Instructions
 
@@ -34,9 +42,5 @@ A Makefile is included in the repository to ease compilation.
 To recompile the entire repository, first run the following command before compiling: 
     make clean
 
-# Producer-Consumer Example Semaphore Analysis
-
-Upon inspecting results of the printed code, it appears the semaphores work properly. Orderings of the producer and consumer result print statements vary on each execution, but that is due to unpredictable thread ordering in each execution by the operating system. Similarly, the outputed buffer sizes can vary because the point at which the consumers acquire the lock from a producer varies on each execution. As long as the sums are correct, then the semaphores should be working properly. That indicates that the shared data remains uncorrupted, no data is overwritten or skipped, and the code is free of synchronization errors.
-
 # Assumptions
-- 
+- No two writers can modify the variable at the same time. They may not make their edits in the order they come in, but the shared data should be protected.
