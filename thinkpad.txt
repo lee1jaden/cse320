@@ -1,0 +1,20 @@
+READERS-WRITERS PROBLEM
+
+nobody there:
+    reader arrives:
+        set reader lock and read one reader at a time
+    writer arrives:
+        set reader lock and begin writing until done
+
+
+reader is reading:
+    reader arrives:
+        wait to read until after reading finishes
+    writer arrives:
+        allow writer to write after reader finishes
+
+writer is writing:
+    reader arrives:
+        wait til all writers are done
+    writer arrives:
+        wait for write to finish before writing
