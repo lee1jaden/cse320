@@ -9,9 +9,9 @@
 #ifndef AS8_H
 #define AS8_H
 
-#define NUM_CHAIRS 5
-#define NUM_CUSTOMERS 3
-#define HAIRCUT_TIME 1
+#define NUM_CHAIRS 2
+#define NUM_CUSTOMERS 6
+#define HAIRCUT_TIME 2
 #define CUSTOMER_INTERVAL 1
 
 /// @brief Thread function for a barber in the sleeping barber problem. If no customers are waiting, the barber will fall asleep

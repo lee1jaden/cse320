@@ -17,9 +17,9 @@
 sem_t customer_sem; // Indicates how many customers are waiting for a haircut.
 sem_t waiting_room_mutex; // Controls access to seats in waiting room so only one thread accesses it at a time.
 sem_t barber_room_mutex; // Controls access to the seat in the barber room so only one customer can be inside at a time.
-sem_t barber_start_sem; // Controls access to the barber's chair so only one waiting customer can sit down.
+sem_t barber_start_sem; // Alerts the customer when the haircut has begun.
 sem_t barber_done_sem; // Alerts the customer when the haircut is complete.
-sem_t customer_left_sem; 
+sem_t customer_left_sem; // Alerts the barber when the customer has left.
 int num_customers_waiting = 0; 
 int haircut_in_progress = 0;
 
@@ -61,6 +61,7 @@ void* barber(void* arg) {
 }
 
 void* customer(void* arg) {
+    // Maintain ID to identify the customer based on when they arrived
     static int customer_count = 0;
     int id = ++customer_count;
 
@@ -92,8 +93,9 @@ void* customer(void* arg) {
         haircut_in_progress = 0;
     } 
     else {
+        // Leave if no seats are available in the waiting room
         printf("Customer %d >>> No seats are available. Now leaving.\n", id);
-        SEM_post(&waiting_room_mutex); // release mutex for waiting room
+        SEM_post(&waiting_room_mutex);
     }
 
     pthread_exit(NULL);
@@ -111,7 +113,6 @@ int main() {
 
     pthread_create(&barber_thread, NULL, barber, NULL);
     for (int i = 0; i < NUM_CUSTOMERS; i++) {
-        int id = i + 1;
         // Sleep to simulate time between customer arrivals
         sleep(CUSTOMER_INTERVAL);
         pthread_create(&customer_threads[i], NULL, customer, NULL);
@@ -131,4 +132,3 @@ int main() {
 
     return 0;
 }
-
