@@ -22,9 +22,10 @@ The scenario involves a hypothetical barbershop with one barber, a single barber
 
 A Makefile is included in the repository to ease compilation. 
 
-1. To compile the producer-consumer program, run the following command: make as8
-2. Then execute the binary file with: ./as8 (Note: the barber will continue sleeping indefinitely once the customers leave. Exit the program with Ctrl-C)
-3. To recompile the entire repository, first run the following command before compiling: make clean
+1. Before compiling, modify the macros in the header to select certain scenario settings.
+2. To compile the sleeping barber program, run the following command: make as8
+3. Then execute the binary file with: ./as8 (Note: the barber will continue sleeping indefinitely once the customers leave. Exit the program with Ctrl-C)
+4. To recompile the entire repository, first run the following command before compiling: make clean
 
 # Assumptions
 - In testing, no starvation has occurred. Therefore, no queue is needed at the present moment to ensure no customers are left waiting.
