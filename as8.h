@@ -10,8 +10,11 @@
 #define AS8_H
 
 #define NUM_CHAIRS 5
+#define NUM_CUSTOMERS 3
+#define HAIRCUT_TIME 1
+#define CUSTOMER_INTERVAL 1
 
-/// @brief Thread function for a barber in the sleeping barber problem. If no customers are waiting, they will fall asleep
+/// @brief Thread function for a barber in the sleeping barber problem. If no customers are waiting, the barber will fall asleep
 ///     in the chair until a customer arrives to wake them. When completed with a haircut, they will check the waiting room 
 ///     for waiting customers.
 /// @param arg NULL (void* argument needed for thread function)

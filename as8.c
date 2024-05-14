@@ -14,83 +14,120 @@
 #include <semaphore.h>
 #include <unistd.h>
 
-sem_t barber_sem, customer_sem, access_seats_sem, haircut_sem, barber_done_sem;
-int num_waiting = 0;
+sem_t customer_sem; // Indicates how many customers are waiting for a haircut.
+sem_t waiting_room_mutex; // Controls access to seats in waiting room so only one thread accesses it at a time.
+sem_t barber_room_mutex; // Controls access to the seat in the barber room so only one customer can be inside at a time.
+sem_t barber_start_sem; // Controls access to the barber's chair so only one waiting customer can sit down.
+sem_t barber_done_sem; // Alerts the customer when the haircut is complete.
+sem_t customer_left_sem; 
+int num_customers_waiting = 0; 
+int haircut_in_progress = 0;
 
 void* barber(void* arg) {
     while (1) {
-        SEM_wait(&customer_sem);
-        SEM_wait(&access_seats_sem);
-
-        if (num_waiting > 0) {
-            num_waiting--;
-            printf("Barber: Cutting hair. Customers waiting: %d\n", num_waiting);
-
-            SEM_post(&access_seats_sem);
-            SEM_post(&haircut_sem);
-
-            // Simulate haircut
-            sleep(1);
-
-            SEM_post(&barber_done_sem);
-        } else {
-            // If no customers are waiting, release the access_seats_sem
-            SEM_post(&access_seats_sem);
+        // Check waiting room for customers and fall asleep if none are waiting
+        SEM_wait(&waiting_room_mutex); 
+        if (num_customers_waiting == 0) {
+            printf("Barber     >>> No customers present. Falling asleep in my chair.\n");
         }
+        SEM_post(&waiting_room_mutex);
+
+        // Wait until a customer arrives
+        SEM_wait(&customer_sem);
+
+        // Accept a customer into the barber shop
+        SEM_wait(&waiting_room_mutex);
+        if (num_customers_waiting == 0) {
+            // Customer found barber asleep
+            printf("Barber     >>> New customer entered and woke me up.\n");
+        }
+        else {
+            // Select a new customer from the waiting room
+            num_customers_waiting--; 
+            printf("Barber     >>> New customer has entered. The number of customers remaining is %d.\n", num_customers_waiting);
+        }
+        SEM_post(&waiting_room_mutex); // release mutex for waiting room
+
+        // Signal that the haircut has begun
+        haircut_in_progress = 1;
+        SEM_post(&barber_start_sem);
+        // Simulate haircut
+        sleep(HAIRCUT_TIME);
+        // Signal that the haircut has ended
+        SEM_post(&barber_done_sem);
+        // Wait for the customer to leave
+        SEM_wait(&customer_left_sem);
     }
 }
 
 void* customer(void* arg) {
-    SEM_wait(&access_seats_sem);
+    static int customer_count = 0;
+    int id = ++customer_count;
 
-    if (num_waiting < NUM_CHAIRS) {
-        num_waiting++;
-        printf("Customer: Arrived. Customers waiting: %d\n", num_waiting);
+    SEM_wait(&waiting_room_mutex);
+    if (num_customers_waiting < NUM_CHAIRS) {
+        num_customers_waiting++;
+        if (num_customers_waiting == 1 && !haircut_in_progress) { // must account that barber is not working
+            // Wake the barber if they are asleep.
+            printf("Customer %d >>> Barber is asleep. Waking them up. \n", id);
+        }
+        else {
+            // Enter the waiting room if barber is working.
+            printf("Customer %d >>> Now that I arrived, the number of customers waiting is %d.\n", id, num_customers_waiting);
+        }
+        SEM_post(&waiting_room_mutex);
+        SEM_post(&customer_sem); // increment amount of customers waiting
 
-        SEM_post(&access_seats_sem);
-        SEM_post(&customer_sem);
-
-        SEM_wait(&haircut_sem);
-        printf("Customer: Got a haircut.\n");
-
+        // One customer enters the barber shop
+        SEM_wait(&barber_room_mutex);   
+        // Acknowledge that haircut has begun
+        SEM_wait(&barber_start_sem);
+        printf("Customer %d >>> Haircut has begun.\n", id);
         // Acknowledge that the haircut is done
         SEM_wait(&barber_done_sem);
-    } else {
-        printf("Customer: No seats available. Leaving.\n");
-        SEM_post(&access_seats_sem);
+        printf("Customer %d >>> Haircut is complete. Now leaving.\n", id);
+        // Customer leaves the barber shop
+        SEM_post(&customer_left_sem);
+        SEM_post(&barber_room_mutex);
+        haircut_in_progress = 0;
+    } 
+    else {
+        printf("Customer %d >>> No seats are available. Now leaving.\n", id);
+        SEM_post(&waiting_room_mutex); // release mutex for waiting room
     }
 
     pthread_exit(NULL);
 }
 
 int main() {
-    pthread_t barber_thread, customer_threads[10];
+    pthread_t barber_thread, customer_threads[NUM_CUSTOMERS];
 
-    SEM_init(&barber_sem, 0, 0);
+    SEM_init(&barber_room_mutex, 0, 1);
     SEM_init(&customer_sem, 0, 0);
-    SEM_init(&access_seats_sem, 0, 1);
-    SEM_init(&haircut_sem, 0, 0);
+    SEM_init(&waiting_room_mutex, 0, 1);
+    SEM_init(&barber_start_sem, 0, 0);
     SEM_init(&barber_done_sem, 0, 0);
+    SEM_init(&customer_left_sem, 0, 0);
 
     pthread_create(&barber_thread, NULL, barber, NULL);
-
-    for (int i = 0; i < 10; ++i) {
-        pthread_create(&customer_threads[i], NULL, customer, NULL);
+    for (int i = 0; i < NUM_CUSTOMERS; i++) {
+        int id = i + 1;
         // Sleep to simulate time between customer arrivals
-        sleep(1);
+        sleep(CUSTOMER_INTERVAL);
+        pthread_create(&customer_threads[i], NULL, customer, NULL);
     }
 
     pthread_join(barber_thread, NULL);
-
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < NUM_CUSTOMERS; i++) {
         pthread_join(customer_threads[i], NULL);
     }
 
-    SEM_destroy(&barber_sem);
+    SEM_destroy(&barber_room_mutex);
     SEM_destroy(&customer_sem);
-    SEM_destroy(&access_seats_sem);
-    SEM_destroy(&haircut_sem);
+    SEM_destroy(&waiting_room_mutex);
+    SEM_destroy(&barber_start_sem);
     SEM_destroy(&barber_done_sem);
+    SEM_destroy(&customer_left_sem);
 
     return 0;
 }
