@@ -1,11 +1,8 @@
-CC = gcc
-CFLAGS = -g -Wall -I.
-
-[executable] : [object files]
-	$(CC) $(CFLAGS) -o [executable name] [object files]
-
-[object file] : [source file] [header file]
-	$(CC) $(CFLAGS) -c [source file]
-
-clean : 
-	rm [executable] ./*.o
+nodl:
+	gcc -o nodl nodl.c matmul.so
+dl:
+	gcc -o dl -rdynamic dl.c -ldl
+lib:    
+	gcc -shared -fpic -o matmul.so matmul.c
+clean:
+	rm matmul.so dl nodl
