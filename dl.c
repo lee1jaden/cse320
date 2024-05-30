@@ -47,21 +47,22 @@ int main() {
         }
     }
 
-
+    // Your implementation using dl functions. Using the macro will output an error message if dynamically linking fails.
     // --------------------------------------------------
-    // Your implementation using dl functions
-    
-    // Load the shared library using dlopen
 
+    // Load the shared library using dlopen
+    void *handle;
+    CHECKNULL_EXIT(handle = dlopen("./matmul.so", RTLD_LAZY | RTLD_GLOBAL));
 
     // Get the symbol for matmul using dlsym
-    
+    void (*_matmul)(int **A, int **B, int **C);
+    CHECKNULL_EXIT(_matmul = dlsym(handle, "matmul"));
 
     // Call the matrix multiplication function using the function symbol
-
+    _matmul(matA, matB, matOut);
 
     // close the shared library
-
+    dlclose(handle);
 
     // --------------------------------------------------
 
