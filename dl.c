@@ -11,6 +11,9 @@
 #include <dlfcn.h>
 #include "matmul.h"
 
+/// @brief Conducts matrix multiplication of the matrices in 'matA.txt' and 'matB.txt' and outputs it to 'matOut.txt'
+///     This program uses dynamic linking functions.
+/// @return 0 if successful, nonzero otherwise
 int main() {
     FILE *inMatA;
     FILE *inMatB;
@@ -32,9 +35,17 @@ int main() {
         matB[i] = (int *)malloc(COLS_B * sizeof(int));
     }
 
-    // Open the file for reading and load integers to matA and matB
+    // Open the file for reading and load integers to matA and matB. Exit gracefully if the files do not exist.
     inMatA = fopen("matA.txt", "rt");
+    if (inMatA == NULL) {
+        printf("Error: Couldn't located 'matA.txt'.\n");
+        exit(EXIT_FAILURE);
+    }
     inMatB = fopen("matB.txt", "rt");
+    if (inMatB == NULL) {
+        printf("Error: Couldn't located 'matB.txt'.\n");
+        exit(EXIT_FAILURE);
+    }
     for(int i = 0; i < ROWS_A; i++){
         for(int j = 0; j < COLS_A; j++){
             fscanf(inMatA, "%d", &matA[i][j]);
@@ -46,6 +57,7 @@ int main() {
             fscanf(inMatB, "%d", &matB[i][j]);
         }
     }
+
 
     // Your implementation using dl functions. Using the macro will output an error message if dynamically linking fails.
     // --------------------------------------------------

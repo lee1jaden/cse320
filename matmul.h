@@ -14,6 +14,8 @@
 #define ROWS_B 3
 #define COLS_B 2
 
+/// @brief Prints an error message if the given expression returns NULL
+/// @param p expression with possible NULL return representing an error
 #define CHECKNULL_EXIT(p)                   \
     if((p) == NULL) {                       \
         fprintf(stderr,                     \
@@ -22,5 +24,10 @@
         exit(1);                            \
     }
 
+/// @brief Multiplies matrices A and B and fills the product into C.
+/// @param A first operand matrix
+/// @param B second operand matrix
+/// @param C product matrix
 void matmul(int **A, int **B, int **C);
+
 #endif

@@ -11,6 +11,8 @@
 #include <dlfcn.h>
 #include "matmul.h"
 
+/// @brief Conducts matrix multiplication of the matrices in 'matA.txt' and 'matB.txt' and outputs it to 'matOut.txt'
+/// @return 0 if successful, nonzero otherwise
 int main() {
     FILE *inMatA;
     FILE *inMatB;
