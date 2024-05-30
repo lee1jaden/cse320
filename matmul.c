@@ -1,9 +1,10 @@
-/*
-* File: matmul.c
-* Owner: Yoonseok Yang
-* Date: 05.23.2024
-* Description: Function of matrix multiplication for neural network in C
-*/
+/// File: matmul.c
+/// Assignment 10 - Mastering Advanced C Programing - Shared Library and Dynamic Linking
+/// Author: Yoon Seok Yang
+/// Course: CSE 320
+/// Professor: Yoon Seok Yang
+/// Date: May 23, 2024
+/// Description: This program implements a function of matrix multiplication for neural networks in C
 
 #include <stdio.h>
 #include <stdlib.h>

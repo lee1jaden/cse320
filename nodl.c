@@ -1,9 +1,10 @@
-/*
-* File: nodl.c
-* Owner: Yoonseok Yang
-* Date: 05.23.2024
-* Description: Implement of matrix multiplication without dynamic linking functions for reference
-*/
+/// File: nodl.c
+/// Assignment 10 - Mastering Advanced C Programing - Shared Library and Dynamic Linking
+/// Author: Yoon Seok Yang
+/// Course: CSE 320
+/// Professor: Yoon Seok Yang
+/// Date: May 23, 2024
+/// Description: This program is an implementation of matrix multiplication without dynamic linking functions for reference.
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,9 +1,10 @@
-/*
-* File: matmul.h
-* Owner: Yoonseok Yang
-* Date: 05.23.2024
-* Description: Header file for matrix multiplication
-*/
+/// File: matmul.h
+/// Assignment 10 - Mastering Advanced C Programing - Shared Library and Dynamic Linking
+/// Author: Yoon Seok Yang
+/// Course: CSE 320
+/// Professor: Yoon Seok Yang
+/// Date: May 23, 2024
+/// Description: This program is a header file for matrix multiplication and handing dynamic link library function errors.
 
 #ifndef __MATMUL__
 #define __MATMUL__

@@ -1,9 +1,10 @@
-/*
-* File: dl.c
-* Owner: Yoonseok Yang
-* Date: 05.23.2024
-* Description: Implement of matrix multiplication with dynamic linking functions
-*/
+/// File: dl.c
+/// Assignment 10 - Mastering Advanced C Programing - Shared Library and Dynamic Linking
+/// Author: Yoon Seok Yang and Jaden Lee
+/// Course: CSE 320
+/// Professor: Yoon Seok Yang
+/// Date: May 23, 2024
+/// Description: This program implements matrix multiplication with dynamic linking functions.
 
 #include <stdio.h>
 #include <stdlib.h>
