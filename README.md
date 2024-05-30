@@ -21,14 +21,16 @@ This repository is a program to implement matrix multiplication using shared lib
 A Makefile is included in the repository to ease compilation. 
 
 1. If the matrix dimensions need to modified, adjust the row and column length macros in the matmul.h file.
-2. To generate the shared library, run the following command: make lib
-3. To generate an executable without dynamic linking, run the following command: make nodl
+2. To generate an executable without dynamic linking, run the following command: make nodl
+3. To generate the shared library, run the following command: make lib
 4. To generate an executable with dynamic linking, run the following command: make dl
 5. Execute the desired binary file with: ./dl or ./nodl
-6. To recompile the entire repository, run the following command before re-compiling: make clean
+6. The output matrix will be outputed to a file titled "matOut.txt"
+7. To recompile the entire repository, run the following command before re-compiling: make clean
 
 # Assumptions
-//todo
+- The folder where the executable resides contains files titled "matA.txt" and "matB.txt" which represent the input matrices.
+- The text files for matrices will contain the correct number of matrix values.
 
 # Matrix Format
 All matrices are represented as a single line of space-delimited integers in text files. They will be read into the program as matrices in a row-first order in the dimensions listed in the 'matmul.h' macro definitions. Edit that file to change the expected matrix dimensions.
